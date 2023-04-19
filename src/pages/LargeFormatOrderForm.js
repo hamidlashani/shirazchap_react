@@ -117,14 +117,74 @@ if(!token){
         $('.punchCountDiv').append('<div className="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">'
        +' <input class="border rounded-lg p-4" min="1" name="punchcount" type="number" placeholder="تعداد پانچ" />'
      +' </div>')
-     $('.lifehDiv').hide();
+     $('.lifehDiv').hide('slow');
 
       }else{
         $('.punchCountDiv').empty();
-        $('.lifehDiv').show();
+        $('.lifehDiv').show('slow');
         
       }
     }
+
+
+    function setShowLifehChiled(res){
+      if(res === true){
+    
+   $('.punchDiv').hide('slow');
+   $('.lifehChiled').empty();
+   $('.lifehChiled').append(`<div class="flex gap-1 flex-col w-1/2">
+   <div class="flex items-center w-full justify-center border border-gray-200 rounded dark:border-gray-700"><label for="derakhti" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">لیفه درختی</label><input id="derakhti" type="radio" name="lifehtype" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" value=""></div>
+   <div class="flex items-center w-full justify-center border border-gray-200 rounded dark:border-gray-700"><label for="darbasti" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">لیفه داربستی</label><input id="darbasti" type="radio" name="lifehtype" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" value=""></div>
+   </div>
+   <div class="flex flex-wrap w-1/2 gap-1 justify-center">
+   <div class="w-2/5 py-3 gap-1 flex border border-gray-200 justify-center items-center rounded-lg"><label>بالا</label><input type="checkbox" /></div>
+   <div class="w-2/5 py-3 gap-1 flex border border-gray-200 justify-center items-center rounded-lg"><label>پایین</label><input type="checkbox" /></div>
+   <div class="w-2/5 py-3 gap-1 flex border border-gray-200 justify-center items-center rounded-lg"><label>چپ</label><input type="checkbox" /></div>
+   <div class="w-2/5 py-3 gap-1 flex border border-gray-200 justify-center items-center rounded-lg"><label>راست</label><input type="checkbox" /></div>
+   </div>
+   
+   `)
+
+    }else{
+      $('.punchDiv').show('slow');
+      $('.lifehChiled').empty();
+      
+    }
+  }
+
+
+  function setShowStandChiled(type,res){
+    if(type === false){
+      $('.stand1').show('slow')
+      $('.stand2').show('slow')
+      $('.stand3').show('slow')
+      $('.standCountDiv').hide('slow')
+      $('.standOptions').hide('slow')
+      $('.rulapCountDiv').hide('slow')
+      $('.ghabfanariCountDiv').hide('slow')
+    }
+    if(type === true && res === 1 ){
+      $('.rulapCountDiv').hide('slow')
+      $('.ghabfanariCountDiv').hide('slow')
+      $('.standOptions').show('slow')
+      $('.standCountDiv').show('slow')
+    }
+    if(type === true && res === 2 ){
+      $('.ghabfanariCountDiv').hide('slow')
+      $('.standCountDiv').hide('slow')
+      $('.standOptions').show('slow')
+      $('.rulapCountDiv').show('slow')
+    }
+    if(type === true && res === 3 ){
+      $('.standCountDiv').hide('slow')
+      $('.rulapCountDiv').hide('slow')
+      $('.standOptions').show('slow')
+      $('.ghabfanariCountDiv').show('slow')
+    }
+    
+
+
+  }
 
 
 
@@ -343,14 +403,29 @@ if (device.devices[0].punch === 1) {
                       setLifehDiv(<div className="flex flex-col mt-4 lifehDiv">
                                     <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceType">لیفه</div>
                                     <div className='flex w-full gap-5 border border-teal-800 p-4 rounded-l-lg rounded-b-lg'>
-                                    <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
+                                    <div class="flex items-center w-1/4 justify-center border border-gray-200 rounded dark:border-gray-700">
                                     <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">بدون لیفه</label>
-                                    <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                    </div><div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
+                                    <input id="bordered-radio-1" 
+                                    type="radio" 
+                                    value="" 
+                                    name="bordered-radio" 
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                    onChange={ (e)=>{
+                                      setShowLifehChiled(false)
+                                    }}
+                                    />
+                                    </div><div class="flex items-center w-1/4 justify-center border border-gray-200 rounded dark:border-gray-700">
                                     <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">با لیفه</label>
-                                    <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    <input id="bordered-radio-1"
+                                    type="radio" 
+                                    value="" 
+                                    name="bordered-radio" 
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" 
+                                    onChange={ (e)=>{
+                                      setShowLifehChiled(true)
+                                    }}                                    />
                                     </div>
-                                  
+                                  <div className='lifehChiled w-2/4 flex'></div>
                                     </div>
                                   </div>);
                     }else{
@@ -358,26 +433,109 @@ if (device.devices[0].punch === 1) {
                     }
                     
                     if (device.devices[0].stand === 1) {
-                      setStandDiv(<div className="flex flex-col mt-4 standDiv">
+                      setStandDiv(
+                      <div className="flex flex-col mt-4 standDiv">
                                     <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceType">نگهدارنده</div>
-                                    <div className='flex w-full gap-5 border border-teal-800 p-4 rounded-l-lg rounded-b-lg'>
-                                    <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
-                                    <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">بدون نگهدارنده</label>
-                                    <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                   
+                                   
+                                    <div className='flex w-full flex-wrap gap-2 border border-teal-800 p-4 rounded-l-lg rounded-b-lg'>
+
+                                    <div class=" flex items-center w-1/4 justify-center border border-gray-200 rounded dark:border-gray-700">
+                                    <label for="" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">بدون نگهدارنده</label>
+                                    <input id="stand-1"
+                                     type="radio" 
+                                     value="" 
+                                     name="bordered-radio" 
+                                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                     onChange={ (e)=>{
+                                      setShowStandChiled(false,1)
+                                    }}
+                                    />
                                     </div>
-                                    <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
-                                    <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">استند</label>
-                                    <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    <div class="stand1 flex items-center w-1/5 justify-center border border-gray-200 rounded dark:border-gray-700">
+                                    <label for="stand-2" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">استند</label>
+                                    <input 
+                                    onChange={ (e)=>{
+                                      setShowStandChiled(true,1)
+                                    }}
+                                    id="stand-2" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
-                                    <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
-                                    <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">رول آپ</label>
-                                    <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    <div class="stand2 flex items-center w-1/4 justify-center border border-gray-200 rounded dark:border-gray-700">
+                                    <label for="stand-3" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">رول آپ</label>
+                                    <input id="stand-3"
+                                    onChange={ (e)=>{
+                                      setShowStandChiled(true,2)
+                                    }}
+                                     type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
-                                    <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
-                                    <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">قاب فنری</label>
-                                    <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    <div class="stand3 flex items-center w-1/4 justify-center border border-gray-200 rounded dark:border-gray-700">
+                                    <label for="stand-4" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">قاب فنری</label>
+                                    <input id="stand-4"
+                                    onChange={ (e)=>{
+                                      setShowStandChiled(true,3)
+                                    }}
+                                     type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
+                                   
+                                   
+                                    <div className='standOptions w-1/3 hidden'>
+                                   
+                                   
+                                    <div class=" items-center w-full justify-center border border-gray-200 rounded dark:border-gray-700  standCountDiv hidden">
+                                    <label for="standCount" class="pr-4 w-full py-4 ml-2 text-center text-sm font-medium text-gray-900 dark:text-gray-300">تعداد استند</label>
+                                    <input 
+                                    id="standCount" 
+                                    type="number" 
+                                    min="1"
+                                    name="standCount" 
+                                    class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                     />
                                     </div>
+
+                                    <div class=" items-center w-full justify-center border border-gray-200 rounded dark:border-gray-700 rulapCountDiv hidden">
+                                    <label for="standCount" class="pr-4 w-full py-4 ml-2 text-center text-sm font-medium text-gray-900 dark:text-gray-300">تعداد رول آپ</label>
+                                    <input 
+                                    id="rulapCount" 
+                                    type="number" 
+                                    min="1"
+                                    name="rulapCount" 
+                                    class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                     />
+                                    </div>
+
+                                    <div class="flex items-center w-full justify-center border border-gray-200 rounded dark:border-gray-700 ghabfanariCountDiv hidden">
+                                    <label for="standCount" class="pr-4 w-full py-4 ml-2 text-center text-sm font-medium text-gray-900 dark:text-gray-300">مشخصات قاب فنری</label>
+                                    <div className='flex'>
+                                    <input 
+                                    id="ghabWidth" 
+                                    type="text" 
+                                    placeholder='طول'
+                                    name="rulapCount" 
+                                    class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                     />
+                                     <input 
+                                    id="ghabHeight" 
+                                    type="text" 
+                                    placeholder='عرض'
+                                    name="rulapCount" 
+                                    class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                     />
+                                     <input 
+                                    id="ghabCount" 
+                                    type="text" 
+                                    placeholder='تعداد'
+                                    name="rulapCount" 
+                                    class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                     />
+</div>
+
+                                    </div>
+                                    
+
+                                    </div>
+</div>
+
+                                 
                                   </div>);
                     }else{
                       setStandDiv(null)   
