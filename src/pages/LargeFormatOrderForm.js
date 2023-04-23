@@ -1,4 +1,4 @@
-  import React, { useState, useEffect } from 'react';
+  import React, { useState, useEffect, useRef } from 'react';
   import axios from "axios";
   import LoadingOverlay from 'react-loading-overlay';
   import Header from '../components/Header';
@@ -13,7 +13,9 @@
   import * as yup from 'yup';
   import { useFormik } from 'formik';
   import Cookies from "js-cookie";
+  import { NumericFormat } from 'react-number-format';
 
+  
   const LargeFormatOrderForm = () => {
     let token = Cookies.get("_token");
 if(!token){
@@ -54,14 +56,13 @@ if(!token){
       
       function setFileToOrder(name){
         $('.fileDiv').empty();
-        $('.fileDiv').append('<div class="w-full flex"><div class="w-1/3 h-48">'
+        $('.fileDiv').append('<div class="w-full flex"><div class="w-full h-48">'
         +'<img class="rounded-lg" style="height:100%;padding:8px;" src="https://shirazchap.org/uploads/'+user_id+'/thumb_'+name+'" /></div>'
-        +'<div class="w-2/3 flex flex-col items-center justify-center">'
+        +'<div class="w-full flex flex-col items-center justify-center">'
         +'<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 576 512" class="text-gray-400 text-8xl" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M572.694 292.093L500.27 416.248A63.997 63.997 0 0 1 444.989 448H45.025c-18.523 0-30.064-20.093-20.731-36.093l72.424-124.155A64 64 0 0 1 152 256h399.964c18.523 0 30.064 20.093 20.73 36.093zM152 224h328v-48c0-26.51-21.49-48-48-48H272l-64-64H48C21.49 64 0 85.49 0 112v278.046l69.077-118.418C86.214 242.25 117.989 224 152 224z"></path></svg>'
         +'جهت تغییر فایل کلیک کنید</div>'
-        +'<input id="file" type="file" className="" />'
         +'</div>');
-        formik.setFieldValue('file', name);
+        formik.setFieldValue('files', name);
 
         setModalIsOpen(false);
 
@@ -70,26 +71,29 @@ if(!token){
 
       const validationSchema = yup.object().shape({
         title: yup.string().required('لطفا عنوان سفارش را وارد کنید'),
-        mediaType: yup.string().required('لطفا نوع مدیا را انتخاب نمایید'),
-        deviceType: yup.string().required('لطفا نوع دستگاه را انتخاب نمایید'),
+        productid: yup.string().required('لطفا نوع مدیا را انتخاب نمایید'),
+        deviceid: yup.string().required('لطفا نوع دستگاه را انتخاب نمایید'),
         thickness: yup.string().required('لطفا ضخامت مدیا را انتخاب نمایید'),
         quality: yup.string().required('لطفا کیفیت مورد نظر خود را انتخاب نمایید'),
         width: yup.string().required('لطفا عرض را انتخاب نمایید'),
         height: yup.string().required('لطفا طول را انتخاب نمایید'),
-        file: yup.string().required('لطفا فایل مربوط به سفارش را انتخاب نمایید'),
+        files: yup.string().required('لطفا فایل مربوط به سفارش را انتخاب نمایید'),
         count: yup.number().required('لطفا تعداد سفارش را وارد نمایید'),
+        delivery: yup.number().required('لطفازمان تحویل سفارش را مشخص نمایید'),
             });
       
       const formik = useFormik({
         initialValues: {
           title: '',
-          mediaType: '',
-          deviceType: '',
+          user_id: user_id,
+          productid: '',
+          deviceid: '',
           thickness:'',
           quality:'',
           width:'',
           height:'',
           file:'',
+          delivery:'',
           count:''
                 },
         validationSchema,
@@ -110,21 +114,72 @@ if(!token){
       const [punchDiv, setPunchDiv] = useState([]);
       const [lifehDiv, setLifehDiv] = useState([]);
       const [standDiv, setStandDiv] = useState([]);
-
+      const [PounchShow, setPunchCount] = useState([]);
+      const [standShow, setStandShow] = useState([]);
+      const [rulapShow, setRulapShow] = useState([]);
+      const [ghabShow1, setGhabShow1] = useState([]);
+      const [ghabShow2, setGhabShow2] = useState([]);
+      const [ghabShow3, setGhabShow3] = useState([]);
+      const [deliveryShow, setDeliveryShow] = useState([]);
+      const [laminetShow, setLaminetShow] = useState([]);
+      
+      
      
-      function setShowPunched(res){
-        if(res === true){
-        $('.punchCountDiv').append('<div className="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">'
-       +' <input class="border rounded-lg p-4" min="1" name="punchcount" type="number" placeholder="تعداد پانچ" />'
-     +' </div>')
-     $('.lifehDiv').hide('slow');
+function totals() {
+  const w = formik.values.width/ 100;
+  const h = formik.values.height / 100;
+  const f = productFee;
+  const c = formik.values.count;
+  let t = w * h * f * c;
+  const cP = formik.values.punchCount;
+  const standCount = $('#standCount').val();
+  const rulapCount = $('#rulapCount').val();
+  const ghabWidth = $('#ghabWidth').val();
+  const ghabHeight = $('#ghabHeight').val();
+  const ghabCount = $('#ghabCount').val();
+  const delivery = formik.values.delivery;
+  
+  if (cP > 0) {
+    t += cP * 1000;
+  }
+  if(standCount > 0 ){
+    t += standCount * 100000
+  }
+  if(rulapCount > 0 ){
+    t += rulapCount * 420000
+  }
+  if(ghabWidth > 0  && ghabHeight > 0 && ghabCount > 0 ){
 
-      }else{
-        $('.punchCountDiv').empty();
-        $('.lifehDiv').show('slow');
-        
-      }
-    }
+    var ghabprices = (((((parseInt(ghabWidth)+parseInt(ghabHeight))+14)*2/100) *25000)+20000)*ghabCount;
+
+    t += ghabprices
+
+  }
+if(delivery === 1){
+  t += (t*15)/100
+}
+
+
+  return t ;
+}
+
+                    
+
+function setShowPunched(res){
+  if(res === true){
+    $('.punchCountDiv').show('slow');
+    $('.lifehDiv').hide('slow');
+  }else{
+    $('.punchCountDiv').hide('slow');
+    $('.lifehDiv').show('slow');
+    $('#punchcount').val(null);
+    setPunchCount('');
+    formik.setFieldValue('punchCount',0)
+
+
+  }
+}
+
 
 
     function setShowLifehChiled(res){
@@ -162,18 +217,30 @@ if(!token){
       $('.standOptions').hide('slow')
       $('.rulapCountDiv').hide('slow')
       $('.ghabfanariCountDiv').hide('slow')
+      setStandShow('')
+      $('#standCount').val(null)
+      setRulapShow('')
+      $('#rulapCount').val(null)
+
+
+
+
     }
     if(type === true && res === 1 ){
       $('.rulapCountDiv').hide('slow')
       $('.ghabfanariCountDiv').hide('slow')
       $('.standOptions').show('slow')
       $('.standCountDiv').show('slow')
+      setRulapShow('')
+      $('#rulapCount').val(null)
     }
     if(type === true && res === 2 ){
       $('.ghabfanariCountDiv').hide('slow')
       $('.standCountDiv').hide('slow')
       $('.standOptions').show('slow')
       $('.rulapCountDiv').show('slow')
+      setStandShow('')
+      $('#standCount').val(null)
     }
     if(type === true && res === 3 ){
       $('.standCountDiv').hide('slow')
@@ -185,6 +252,9 @@ if(!token){
 
 
   }
+
+  const inputRef = useRef(null);
+
 
 
 
@@ -204,11 +274,8 @@ if(!token){
 
 
 
-
-
-
     const [title, setTitle] = useState("");
-    const [mediaType, setmedia] = useState("");
+    const [productid, setmedia] = useState("");
     const [thickness, setThickness] = useState("");
     const [quality, setQuality] = useState("");
     const [width, setWidth] = useState([]);
@@ -241,7 +308,7 @@ if(!token){
   const defaultOption = mediaoptions.find(option => option.value === parseInt(paramsId) );
   useEffect(() => {
     const selectedMedia = paramsId;
-    const defaultOptions = $('#mediaType').find(option => option.value === parseInt(paramsId) );
+    const defaultOptions = $('#productid').find(option => option.value === parseInt(paramsId) );
 
     setIsLoading(true);
     axios.post('https://shirazchap.org/api/getticknes?lid=' + selectedMedia)
@@ -268,7 +335,6 @@ if(!token){
 
 
 
-
   
   return (
       <div>  
@@ -290,26 +356,35 @@ if(!token){
               type="text"
               id="title"
               name='title'
-              onChange={formik.handleChange} value={formik.values.title} onBlur={formik.handleBlur} 
+              ref={inputRef}
+              onChange={formik.handleChange} 
+              value={formik.values.title} 
+              onBlur={formik.handleBlur} 
               placeholder="مثال : تابلو آقای محمدی"
               className="border rounded-lg w-full border-gray-300 p-2"
             />
-            {formik.touched.title && formik.errors.title ? <div className="text-red-400 text-sm mt-2 w-full">{formik.errors.title}</div> : null}
+            {
+            formik.touched.title && formik.errors.title ? 
+            <div className="text-red-400 text-sm mt-2 w-full">
+              {formik.errors.title }
+              </div>
+            : null
+            }
           </div>
           </div>
          
           <div className="flex items-center border p-2 rounded-lg mt-2">
-            <label className='w-1/4' htmlFor="mediaType">نوع مدیا:</label>
+            <label className='w-1/4' htmlFor="productid">نوع مدیا:</label>
             <div className='flex flex-col w-full'>
             <Select 
               id="ّ"
-              name="mediaType"
+              name="productid"
               placeholder={<div>-- انتخاب نوع مدیا --</div>} 
               options ={mediaoptions}
               onChange={ (e)=>{
 
                   const selectedMedia = e.value;
-                  formik.setFieldValue('mediaType', selectedMedia);
+                  formik.setFieldValue('productid', selectedMedia);
                   setIsLoading(true);
                   axios.post('https://shirazchap.org/api/getticknes?lid=' + selectedMedia)
                   .then(response => {
@@ -318,7 +393,7 @@ if(!token){
                     setMedia(' جنس مدیا : '+e.label);
                     setIsLoading(false);
                     setMediaId(selectedMedia);
-                                      formik.setFieldValue('mediaType', selectedMedia);
+                                      formik.setFieldValue('productid', selectedMedia);
 
                   })
                   .catch(error => {
@@ -332,22 +407,39 @@ if(!token){
                     
                     if (device.devices[0].laminet === 1) {
                       setLaminateDiv(<div className="flex flex-col mt-4">
-                                    <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceType">لمینت</div>
+                                    <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceid">لمینت</div>
                                     <div className='flex w-full gap-5 border border-teal-800 p-4 rounded-l-lg rounded-b-lg'>
                                     <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
-                                    <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">بدون لمینت</label>
-                                    <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    <label for="laminet" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">بدون لمینت</label>
+                                    <input 
+                                    id="laminet" 
+                                    type="radio" 
+                                    name="laminet"
+                                    onChange={ (e)=>{
+                                      formik.setFieldValue('laminet',"")
+                                      setLaminetShow('');
+                                    }}
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div><div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
-                                    <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">لمینت برق</label>
-                                    <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    <label for="laminet1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">لمینت برق</label>
+                                    <input 
+                                    id="laminet1" 
+                                    type="radio" 
+                                    onChange={ (e)=>{
+                                      formik.setFieldValue('laminet',1)
+                                      setLaminetShow('لمینت براق ');
+                                    }}
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
                                     <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
-                                    <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">لمینت مات</label>
+                                    <label for="laminet2" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">لمینت مات</label>
                                     <input 
-                                    id="bordered-radio-1"
+                                    id="laminet2"
                                      type="radio" 
-                                     value="" 
-                                     name="bordered-radio" 
+                                     onChange={ (e)=>{
+                                      formik.setFieldValue('laminet',2)
+                                      setLaminetShow('لمینت مات');
+                                    }}
                                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div></div>
                                   </div>);
@@ -361,7 +453,7 @@ if(!token){
 if (device.devices[0].punch === 1) {
   setPunchDiv(
     <div className="flex flex-col mt-4 punchDiv">
-      <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceType">پانچ</div>
+      <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceid">پانچ</div>
       <div className='flex w-full gap-5 border border-teal-800 p-4 rounded-l-lg rounded-b-lg'>
         <div className="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
           <label htmlFor="noPunch" className="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">بدون پانچ</label>
@@ -391,7 +483,16 @@ if (device.devices[0].punch === 1) {
         }           />
         </div>
        
-        <div className="punchCountDiv" ></div>
+        <div className='punchCountDiv hidden flex items-center w-1/3 justify-center rounded dark:border-gray-700'>
+      <input class='border rounded-lg p-4' min='1' id='punchcount' name='punchcount'
+        type='number' placeholder='تعداد پانچ'
+        onChange={(e) => {
+          formik.setFieldValue('punchCount',e.target.value)
+          setPunchCount(' تعداد پانچ : '+e.target.value+' عدد');
+        }
+        }
+      />
+    </div>
 
       </div>
     </div>
@@ -401,7 +502,7 @@ if (device.devices[0].punch === 1) {
                     
                     if (device.devices[0].lifeh === 1) {
                       setLifehDiv(<div className="flex flex-col mt-4 lifehDiv">
-                                    <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceType">لیفه</div>
+                                    <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceid">لیفه</div>
                                     <div className='flex w-full gap-5 border border-teal-800 p-4 rounded-l-lg rounded-b-lg'>
                                     <div class="flex items-center w-1/4 justify-center border border-gray-200 rounded dark:border-gray-700">
                                     <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">بدون لیفه</label>
@@ -435,7 +536,7 @@ if (device.devices[0].punch === 1) {
                     if (device.devices[0].stand === 1) {
                       setStandDiv(
                       <div className="flex flex-col mt-4 standDiv">
-                                    <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceType">نگهدارنده</div>
+                                    <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceid">نگهدارنده</div>
                                    
                                    
                                     <div className='flex w-full flex-wrap gap-2 border border-teal-800 p-4 rounded-l-lg rounded-b-lg'>
@@ -445,7 +546,7 @@ if (device.devices[0].punch === 1) {
                                     <input id="stand-1"
                                      type="radio" 
                                      value="" 
-                                     name="bordered-radio" 
+                                     name="stand1" 
                                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                      onChange={ (e)=>{
                                       setShowStandChiled(false,1)
@@ -458,7 +559,7 @@ if (device.devices[0].punch === 1) {
                                     onChange={ (e)=>{
                                       setShowStandChiled(true,1)
                                     }}
-                                    id="stand-2" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    id="stand-2" type="radio" value="" name="stand2" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
                                     <div class="stand2 flex items-center w-1/4 justify-center border border-gray-200 rounded dark:border-gray-700">
                                     <label for="stand-3" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">رول آپ</label>
@@ -466,7 +567,7 @@ if (device.devices[0].punch === 1) {
                                     onChange={ (e)=>{
                                       setShowStandChiled(true,2)
                                     }}
-                                     type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                     type="radio" value="" name="stand3" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
                                     <div class="stand3 flex items-center w-1/4 justify-center border border-gray-200 rounded dark:border-gray-700">
                                     <label for="stand-4" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">قاب فنری</label>
@@ -474,7 +575,7 @@ if (device.devices[0].punch === 1) {
                                     onChange={ (e)=>{
                                       setShowStandChiled(true,3)
                                     }}
-                                     type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                     type="radio" value="" name="stand4" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                     </div>
                                    
                                    
@@ -488,6 +589,9 @@ if (device.devices[0].punch === 1) {
                                     type="number" 
                                     min="1"
                                     name="standCount" 
+                                    onChange={ (e)=>{
+                                      setStandShow('تعداد استند : '+ e.target.value + ' عدد')
+                                    }}
                                     class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                      />
                                     </div>
@@ -499,32 +603,40 @@ if (device.devices[0].punch === 1) {
                                     type="number" 
                                     min="1"
                                     name="rulapCount" 
+                                    onChange={ (e)=>{
+                                      setRulapShow('تعداد رول آپ : '+ e.target.value + ' عدد')
+                                    }}
                                     class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                      />
                                     </div>
-
                                     <div class="flex items-center w-full justify-center border border-gray-200 rounded dark:border-gray-700 ghabfanariCountDiv hidden">
                                     <label for="standCount" class="pr-4 w-full py-4 ml-2 text-center text-sm font-medium text-gray-900 dark:text-gray-300">مشخصات قاب فنری</label>
                                     <div className='flex'>
                                     <input 
                                     id="ghabWidth" 
-                                    type="text" 
+                                    type="number" 
+                                    onChange={ (e)=>{
+                                      setGhabShow1('طول قاب فنری  : '+ e.target.value + ' سانتی متر')
+                                    }}
                                     placeholder='طول'
-                                    name="rulapCount" 
                                     class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                      />
                                      <input 
                                     id="ghabHeight" 
-                                    type="text" 
+                                    type="number" 
+                                    onChange={ (e)=>{
+                                      setGhabShow2('عرض قاب فنری  : '+ e.target.value + ' سانتی متر')
+                                    }}
                                     placeholder='عرض'
-                                    name="rulapCount" 
                                     class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                      />
                                      <input 
                                     id="ghabCount" 
-                                    type="text" 
+                                    type="number" 
                                     placeholder='تعداد'
-                                    name="rulapCount" 
+                                    onChange={ (e)=>{
+                                      setGhabShow3('تعداد قاب فنری  : '+ e.target.value + ' عدد')
+                                    }}
                                     class="w-full text-gray-600 text-center  border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                      />
 </div>
@@ -550,24 +662,24 @@ if (device.devices[0].punch === 1) {
               }}
               className="w-full"
           />
-            {formik.touched.mediaType && formik.errors.mediaType ? <div className="text-red-400 text-sm mt-2 w-full">{formik.errors.mediaType}</div> : null}
+            {formik.touched.productid && formik.errors.productid ? <div className="text-red-400 text-sm mt-2 w-full">{formik.errors.productid}</div> : null}
           </div>
           </div>
       
           <div className="flex items-center border p-2 rounded-lg mt-2">
-            <label className='w-1/4' htmlFor="deviceType">نوع دستگاه :</label>
+            <label className='w-1/4' htmlFor="deviceid">نوع دستگاه :</label>
             <div className='flex flex-col w-full'>
             <select
-              id="deviceType"
+              id="deviceid"
               onChange={ (e)=>{
                 setDeviceId(e.target.value)
-                formik.setFieldValue('deviceType', e.target.value);
+                formik.setFieldValue('deviceid', e.target.value);
                 setDeviceShow(' نوع دستگاه : '+e.target.options[e.target.selectedIndex].text);
 
               }
             }
               className="border w-full rounded-lg border-gray-400 p-2"
-              value={formik.values.deviceType} onBlur={formik.handleBlur} 
+              value={formik.values.deviceid} onBlur={formik.handleBlur} 
 
             >
               <option value="">انتخاب کنید</option>
@@ -576,7 +688,7 @@ if (device.devices[0].punch === 1) {
                   )
                   )} 
               </select>
-              {formik.touched.deviceType && formik.errors.deviceType ? <div className="text-red-400 text-sm mt-2 w-full">{formik.errors.deviceType}</div> : null}
+              {formik.touched.deviceid && formik.errors.deviceid ? <div className="text-red-400 text-sm mt-2 w-full">{formik.errors.deviceid}</div> : null}
           </div>
 </div>
         
@@ -591,7 +703,7 @@ if (device.devices[0].punch === 1) {
 
                   setIsLoading(true);
                   setThicknessId(selectedThickness)
-                  const defaultOptions = $('#mediaType').find(option => option.value === parseInt(selectedThickness) )
+                  const defaultOptions = $('#productid').find(option => option.value === parseInt(selectedThickness) )
 
                     axios.post('https://shirazchap.org/api/getpass?deviceid='+deviceId+'&thicknessid='+selectedThickness+'&productid='+mediaId)
                     .then(response => {
@@ -713,7 +825,7 @@ if (device.devices[0].punch === 1) {
           </div>
 
           <div className="flex border items-center p-2 rounded-lg">
-            <label className=' w-1/4' htmlFor="title">تعداد : </label>
+            <label className=' w-1/4' htmlFor="count">تعداد : </label>
             <div className='flex flex-col w-full'>
             <input
               type="number"
@@ -721,6 +833,7 @@ if (device.devices[0].punch === 1) {
               name='count'
               min={1}
               onChange={(e)=>{
+
                 formik.setFieldValue('count', e.target.value);
                 setCountShow(' تعداد : '+e.target.value+' عدد');
 
@@ -739,17 +852,35 @@ if (device.devices[0].punch === 1) {
           { standDiv}
 
           <div className="flex flex-col mt-4">
-          <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="deviceType">زمان تحویل</div>
+          <div className='bg-teal-800 text-white p-3 w-28 rounded-t-lg text-center' htmlFor="delivery">زمان تحویل</div>
           <div className='flex w-full gap-5 border border-teal-800 p-4 rounded-l-lg rounded-b-lg'>
           <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
           <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">یک روز کاری</label>
-          <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+          <input id="bordered-radio-1"
+          onChange={(e)=>{
+            setDeliveryShow('تحویل یک روز کاری');
+            formik.setFieldValue('delivery', 0);
+
+          }}
+           type="radio"
+           name="delivery" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
           </div>
           <div class="flex items-center w-1/3 justify-center border border-gray-200 rounded dark:border-gray-700">
           <label for="bordered-radio-1" class="pr-4 py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">فوری</label>
-          <input id="bordered-radio-1" type="radio" value="" name="bordered-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+          <input id="bordered-radio-1" 
+          type="radio" 
+          name="delivery" 
+          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" 
+          onChange={(e)=>{
+            setDeliveryShow('تحویل فوری');
+            formik.setFieldValue('delivery', 1);
+
+          }}
+          />
           </div>
           </div>
+          {formik.touched.delivery && formik.errors.delivery ? <div className="text-red-400 text-sm mt-2 w-full">{formik.errors.delivery}</div> : null}
+
           </div>
           <div className="flex items-center border rounded-lg mt-2">
         
@@ -773,7 +904,7 @@ if (device.devices[0].punch === 1) {
                       <div class="flex flex-col items-center">
                         <FaFolderOpen className='text-gray-400 text-8xl' />
                       <span class="block text-gray-400 font-normal">انتخاب فایل</span>
-                      <input id='file' type={file} className="" />
+                      <input id='file' type={file} className="hidden" />
                       </div>
                     </div>
                   </div>
@@ -812,7 +943,7 @@ if (device.devices[0].punch === 1) {
 
   </form>
       </div>
-      <div className='w-4/12 p-6 grid grid-rows-1 bg-white sticky top-0 self-start min-h-[300px]'>
+      <div className='w-4/12 p-6 grid grid-rows-1 mb-16 bg-white sticky top-20 self-start min-h-[550px]'>
 <div className='flex flex-col gap-3'>
 {media.length >0  &&
   <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{media}</div>
@@ -834,11 +965,47 @@ if (device.devices[0].punch === 1) {
   }
   {countShow.length >0  &&
   <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{countShow}</div>
-}
+  }  
+  {PounchShow.length >0  &&
+  <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{PounchShow}</div>
+  }
+  {standShow.length >0  &&
+  <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{standShow}</div>
+  }
+  {rulapShow.length >0  &&
+  <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{rulapShow}</div>
+  }
+  {ghabShow1.length >0  &&
+  <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{ghabShow1}</div>
+  }
+  {ghabShow2.length >0  &&
+  <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{ghabShow2}</div>
+  }
+  {ghabShow3.length >0  &&
+  <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{ghabShow3}</div>
+  }
+  {deliveryShow.length >0  &&
+  <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{deliveryShow}</div>
+  } 
+ {laminetShow.length > 0  &&
+    <div className='flex gap-2 text-base items-center h-6'><FaChevronCircleLeft className='mt-[5px]' />{laminetShow}</div>
+    }
+
+<div className='absolute bottom-4'>مبلغ سفارش : 
+  <NumericFormat 
+  id='total' 
+  value={ totals() } 
+  allowLeadingZeros 
+  thousandSeparator=","
+   />
+   تومان
 </div>
 
 
-  <div onClick={() => $('#submit').click() } className='w-full bg-teal-800 absolute top-full mt-4 p-3 text-center text-white'>
+</div>
+
+
+  <div onClick={() => $('#submit').click() } className='w-full cursor-pointer bg-teal-800 absolute top-full mt-4 p-3 text-center text-white'>
     بررسی اطلاعات
   </div>
 
